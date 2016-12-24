@@ -128,10 +128,12 @@ while [ $# -gt 0 ]; do
 
   thumb="thumbs/${file%.*}_th.$output"
   mogrify -auto-orient "./$file[0]"
-  convert -verbose -quality $quality -thumbnail $width "./$file[0]" "$thumb" |
-  { IFS=">x+ " ; read x x x x x width height x
-  echo "<a href=\"$file\"><img alt=\"$file\" src=\"$thumb\" border=\"$border\" width=\"$width\" height=\"$height\"></a>" \
-     >> "$index$idx.html" ; }
+  convert -quality $quality -thumbnail $width "./$file[0]" "$thumb"
+  identify -format "%w %h" "$thumb" | {
+    read thwidth thheight
+    echo "<a href=\"$file\"><img alt=\"$file\" src=\"$thumb\" border=\"$border\" width=\"$thwidth\" height=\"$thheight\"></a>" \
+     >> "$index$idx.html"
+  }
   printf "%s\n" "$file --> $thumb"
   
   n=$((n + 1))
