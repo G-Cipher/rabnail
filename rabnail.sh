@@ -19,8 +19,6 @@
 # Allow sorting by user-specified criteria rather than by type.
 # Generate quick links to each gallery page in footer.
 
-# Modified 2012-05-29.
-
 # Force create mask to world-readable
 umask 0022
 
