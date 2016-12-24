@@ -126,7 +126,7 @@ while [ $# -gt 0 ]; do
     n=1
   fi
 
-  thumb="thumbs/${file%.*}_th.$output"
+  thumb="thumbs/$(printf %s "$file" | tr . _)_th.$output"
   mogrify -auto-orient "./$file[0]"
   convert -quality $quality -thumbnail $width "./$file[0]" "$thumb"
   identify -format "%w %h" "$thumb" | {
