@@ -93,15 +93,15 @@ if [ ! -e "thumbs" ]; then mkdir thumbs ; fi
 
 for file in $index*.html; do
   [ -e "$file" ] || continue
-  oldindex=`grep -l -s "PREVENT RABNAIL" $file`
-  if [ ! -z "$oldindex" ]
-    then echo "Deleting old rabnail index: $oldindex"
-      rm $oldindex
-    else echo "$file was not created by rabnail, cannot overwrite!"
-         echo "Feel free to specify an alternate index name with the -i option."
-         echo ""
-         echo "Exiting..."
-         exit 1
+  if grep -q "PREVENT RABNAIL" "$file"; then
+    echo "Deleting old rabnail index: $file"
+    rm -f "$file"
+  else
+    echo "$file was not created by rabnail, cannot overwrite!"
+    echo "Feel free to specify an alternate index name with the -i option."
+    echo ""
+    echo "Exiting..."
+    exit 1
   fi
 done
 
