@@ -127,7 +127,7 @@ while [ $# -gt 0 ]; do
   fi
 
   thumb="thumbs/${file%.*}_th.$output"
-  mogrify -auto-orient "./$file"
+  mogrify -auto-orient "./$file[0]"
   convert -verbose -quality $quality -thumbnail $width "./$file[0]" "$thumb" |
   { IFS=">x+ " ; read x x x x x width height x
   echo "<a href=\"$file\"><img alt=\"$file\" src=\"$thumb\" border=\"$border\" width=\"$width\" height=\"$height\"></a>" \
