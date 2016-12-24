@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # rabnail.sh (a)2012 reboots at g-cipher.net - http://reboots.g-cipher.net/
 # Rabnail was originally conceived as a revision of Jacob Brown's WireThumb,
 # which was released under the LGPL. Due to unfamiliarity with perl it has
@@ -90,10 +90,9 @@ echo
 if [ ! -e "thumbs" ]; then mkdir thumbs ; fi
 
 # Remove old indices
-shopt -s nullglob
 
-for file in $index*.html
-do
+for file in $index*.html; do
+  [ -e "$file" ] || continue
   oldindex=`grep -l -s "PREVENT RABNAIL" $file`
   if [ ! -z "$oldindex" ]
     then echo "Deleting old rabnail index: $oldindex"
@@ -119,11 +118,11 @@ n=1
 while [ $# -gt 0 ]; do
   file="$1"
   shift
-  if [ "$n" -gt "$pixperpage" ]
-    then let "idx += 1"
-      echo -e "$header $body" > "$index$idx.html"
-      echo -e "Creating $index$idx.html" #debug
-      n=1
+  if [ "$n" -gt "$pixperpage" ]; then
+    idx=$((idx + 1))
+    echo -e "$header $body" > "$index$idx.html"
+    echo -e "Creating $index$idx.html" #debug
+    n=1
   fi
 
   thumb="thumbs/${file%.*}_th.$output"
@@ -134,7 +133,7 @@ while [ $# -gt 0 ]; do
      >> "$index$idx.html" ; }
   printf "%s\n" "$file --> $thumb"
   
-  let "n += 1"
+  n=$((n + 1))
 
 done
 
@@ -142,38 +141,32 @@ done
 topen="<p><table width=\"95%\">\n<tr><td align=left>"
 tclose="</td></tr>\n</table>"
 
-for file in $index*.html
-do
-  idx=`echo $file | { IFS="."; read a x ; echo ${a#$index} ;}`
-  next="$index`{ let "idx +=1"; echo $idx ;}`.html"
+for file in $index*.html; do
+  idx="${file%.html}"
+  idx=${idx#$index}
+  next="$index$((idx + 1)).html"
 
-  if [ "$idx" \> "1" ]
-    then echo -e \
-      "$topen<a href=\"$index`{ let "idx -=1"; echo $idx ;}`.html\">Back</a>" \
-        >> "$file"
-      if [ -e "$next" ]
-        then echo -e \
-        "</td><td align=right><a href=\"$next\">Next</a>" >> "$file"
-      fi
-      echo -e "$tclose" >> "$file"
-
-    else if [ "$idx" = "1" ]
-      then echo -e "$topen<a href=\"$index.html\">Back</a></td>" >> $file
-        if [ -e "$next" ]
-          then echo -e \
-          "<td align=right><a href=\"$next\">Next</a>$tclose" >> $file
-          else echo -e "<td align=right>$tclose" >> $file
-        fi
-
-      else if [ -z "$idx" ]
-        then if [ -e "$next" ]
-          then echo -e \
-            "$topen</td><td align=right><a href=\"$next\">Next</a>$tclose" \
-              >> $file
-          else echo -e "<p>" >> $file
-        fi
-      fi
-    fi  
+  if [ -z "$idx" ]; then
+    if [ -e "$next" ]; then
+      echo -e "$topen</td><td align=right><a href=\"$next\">Next</a>$tclose" \
+        >> $file
+    else
+      echo "<p>" >> $file
+    fi
+  elif [ $idx -gt 1 ]; then
+    echo -e "$topen<a href=\"$index$((idx - 1)).html\">Back</a>" >> "$file"
+    if [ -e "$next" ]; then
+      echo "</td><td align=right><a href=\"$next\">Next</a>" >> "$file"
+    fi
+    echo -e "$tclose" >> "$file"
+  else
+    echo -e "$topen<a href=\"$index.html\">Back</a></td>" >> $file
+    if [ -e "$next" ]; then
+      echo "<td align=right><a href=\"$next\">Next</a>" >> $file
+    else
+      echo "<td align=right>" >> $file
+    fi
+    echo -e "$tclose" >> "$file"
   fi  
   echo -e "$footer" >> "$file"  
 done
